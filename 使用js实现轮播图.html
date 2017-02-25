@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>使用js实现轮播图</title>
+	<style>
+	  *{
+	  	margin:0;
+	  	padding:0;
+	  	text-decoration:none;
+	  }
+	  body{
+	  	padding:20px;
+	  }
+	  #container{
+	  	width:600px;
+	  	height:400px;
+	  	border:3px solid #333;
+	    overflow:hidden;
+	    position:relative;
+	  }
+	  #list{
+	  	width:4200px;
+	  	height:400px;
+	  	position:absolute;
+	  	z-index:1;
+	  }
+	  #list img{
+	  	float:left;
+	  }
+	  #buttons{
+	  	position:absolute;
+	  	height:10px;
+	  	width:100px;
+	  	bottom:20px;
+	  	left:250px;
+	  	z-index:2;
+	  }
+	  #buttons span{
+	  	cursor:pointer;
+	  	float:left;
+	  	border:1px solid #fff;
+	  	width:10px;
+	  	height:10px;
+	  	border-radius:50%;
+	  	background:#333;
+	  	margin-right:5px;
+	  }
+	  #buttons .on{
+	  	background:orangered;
+	  }
+	  .arrow{
+	  	cursor:pointer;
+	  	display:none;
+	  	line-height:39px;
+	  	text-align:center;
+	  	font-size:36px;
+	  	font-weight:bold;
+	  	width:40px;
+	  	height:40px;
+	  	position:absolute;
+	  	z-index:2;
+	  	top:180px;
+	  	background-color:RGBA(0,0,0,.3);
+	  	color:#fff;
+	  }
+	  .arrow:hover{
+	  	background-color:RGBA(0,0,0,.7);
+	  }
+	  #container:hover .arrow{
+	  	display:block;
+	  }
+	  #prev{
+	  	left:20px;
+	  }
+	  #next{
+	  	right:20px;
+	  }
+	</style>
+	<script>
+	   window.onload = function(){
+	   	   var container = document.getElementById("container");//获取容器container
+	   	   var list = document.getElementById("list");//获取图片列表容器list
+	   	   var buttons = document.getElementById("buttons").getElementsByTagName("span");//获取按钮中的span标签
+	   	   var prev = document.getElementById("prev");//获取左箭头
+	   	   var next = document.getElementById("next");//获取右键头
+	   	   var index = 1;//显示当前图片的索引
+	   	   var animated = false;
+	   	   var timer;
+	   	   function showButton(){
+	   	   	   for(var i = 0;i < buttons.length; i++){
+	   	   	   	   if(buttons[i].className == 'on'){
+	   	   	   	   	buttons[i].className = '';
+	   	   	   	   	break;
+	   	   	   	   }
+	   	   	   }
+	   	   	   buttons[index - 1].className = 'on';
+	   	   }
+	   	   function play(){
+                timer = setInterval(function(){
+                        next.onclick();
+                },1500);
+	   	   }
+	   	   function stop(){
+	   	   	    clearInterval(timer);
+	   	   }
+	   	   function animate(offset){
+	   	   	animated = true;
+	   	   	var newLeft = parseInt(list.style.left) + offset;
+	   	   	var time = 300;//位移总时间
+	   	   	var interval = 10; //位移间隔
+	   	   	var speed = offset/(time/interval);//每次位移量
+            function go(){
+            	if ((speed < 0 && parseInt(list.style.left) > newLeft) || (speed >0 && parseInt(list.style.left) < newLeft)) {
+                    list.style.left = parseInt(list.style.left) + speed + 'px';
+                    setTimeout(go,interval);
+            	}
+                else{
+                   animated = false;
+                   list.style.left = newLeft + 'px';
+	   	   	       if(newLeft > -600){
+	   	   	   	      list.style.left = -3000 + 'px';
+	   	   	       }
+	   	   	       if(newLeft < -3000){
+	   	   	   	      list.style.left = -600 + 'px';
+	   	   	       }
+               }
+            }
+
+	   	   	go();
+	   	   }//将改变list的left属性封装为一个animate函数，接受一个偏移量参数
+	   	   container.onmouseover = stop;
+	   	   container.onmouseout = play;
+	   	   play();
+	   	   next.onclick = function(){
+                  if(index == 5){
+                  	index = 1;
+                  } else {
+                   index += 1;                 	
+                  }
+                  showButton();
+                  if(!animated) {
+                  animate(-600);
+                  }
+	   	   }
+	   	   prev.onclick = function(){
+	   	   	      if(index == 1){
+                  	index = 5;
+                  } else {
+                   index -= 1;                 	
+                  }
+	   	   	      showButton();
+	   	   	      if(!animated) {
+	   	   	      animate(600);
+	   	   	      }
+	   	   }
+	   	   for(var i = 0;i < buttons.length; i++){
+	   	   	   buttons[i].onclick = function(){
+	   	   	   	  if(this.className == 'on'){
+                       return;
+	   	   	   	  }
+	   	   	   	  var myIndex = parseInt(this.getAttribute('index'));
+	   	   	   	  //this自定义的属性不可以通过点获取
+	   	   	   	  var offset = -600 * (myIndex - index);
+	   	   	   	  animate(offset);
+	   	   	   	  index = myIndex;
+	   	   	   	  showButton();
+	   	   	   }
+	   	   }
+	   }
+	</script>
+</head>
+<body>
+	<div id="container">
+	   <div id="list" style="left:-600px;">
+	     <img src="img\5.jpg">
+	     <img src="img\1.jpg">
+	     <img src="img\2.jpg">
+	     <img src="img\3.jpg">
+	     <img src="img\4.jpg">
+	     <img src="img\5.jpg">
+	     <img src="img\1.jpg">
+	   </div>
+	   <div id="buttons">
+	     <span index="1" class="on"></span>
+	     <span index="2"></span>
+	     <span index="3"></span>
+	     <span index="4"></span>
+	     <span index="5"></span>
+	   </div>
+	   <a href="javascript:;" id="prev" class="arrow">&lt;</a><!--javascript:是一个伪协议，是表示在触发<a>默认动作时，执行一段javascript代码，而javascript:;表示什么都不执行，这样点击<a>标签没有任何反应-->
+	   <a href="javascript:;" id="next" class="arrow">&gt;</a>
+	</div>
+</body>
+</html>
